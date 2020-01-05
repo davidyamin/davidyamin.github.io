@@ -1,0 +1,1156 @@
+######################################
+#
+#Author: David Yamin
+#Subject: 2019 MLB Simulation Model
+#
+######################################
+
+###import project data
+
+library(tidyverse)
+library (dplyr)
+library(readxl)
+pitchers <- read_excel("C:/Users/David Yamin/Downloads/FG_2019_Pitchers.xlsx")
+hitters <- read_excel("C:/Users/David Yamin/Downloads/FG_2019_Hitters.xlsx")
+
+###calculate project Pytagorean win pct. for each team
+
+teams <-   c("Blue Jays", "Orioles", "Rays", "Red Sox", "Yankees", "Angels","Astros","Athletics",
+             "Braves", "Brewers", "Cardinals", "Cubs", "Diamondbacks", "Dodgers", "Giants", "Indians",
+             "Mariners", "Marlins", "Mets", "Nationals", "Padres", "Phillies", "Pirates", "Rangers",
+             "Reds", "Rockies","Royals", "Tigers", "Twins", "White Sox") 
+
+teamPythCalc <- function (teams){
+  pyth <-c()
+  for (x in teams) {
+    hittersPyth <- subset(hitters, hitters$Team == x)
+    pitchersPyth <- subset(pitchers, pitchers$Team == x)
+    run.adjust <- 1.08
+    rs<-sum(hittersPyth$R)
+    ra<-(sum(pitchersPyth$ER))*run.adjust
+    z<-(rs^1.83)/((rs^1.83)+(ra^1.83))
+    pyth <- c(pyth, z)
+    
+  }
+  proj_win_pct <- data.frame(pyth)
+  return (proj_win_pct)
+}
+
+MLBteams_pyth <- data.frame(teams, teamPythCalc(teams))
+
+bluejays <- MLBteams_pyth[MLBteams_pyth$teams == "Blue Jays",]
+orioles <- MLBteams_pyth[MLBteams_pyth$teams == "Orioles",]
+rays <- MLBteams_pyth[MLBteams_pyth$teams == "Rays",]
+redsox <- MLBteams_pyth[MLBteams_pyth$teams == "Red Sox",]
+yankees <- MLBteams_pyth[MLBteams_pyth$teams == "Yankees",]
+angels <- MLBteams_pyth[MLBteams_pyth$teams == "Angels",]
+astros <- MLBteams_pyth[MLBteams_pyth$teams == "Astros",]
+athletics <- MLBteams_pyth[MLBteams_pyth$teams == "Athletics",]
+braves <- MLBteams_pyth[MLBteams_pyth$teams == "Braves",]
+brewers <- MLBteams_pyth[MLBteams_pyth$teams == "Brewers",]
+cardinals <- MLBteams_pyth[MLBteams_pyth$teams == "Cardinals",]
+cubs <- MLBteams_pyth[MLBteams_pyth$teams == "Cubs",]
+diamondbacks <- MLBteams_pyth[MLBteams_pyth$teams == "Diamondbacks",]
+dodgers <- MLBteams_pyth[MLBteams_pyth$teams == "Dodgers",]
+giants <- MLBteams_pyth[MLBteams_pyth$teams == "Giants",]
+indians <- MLBteams_pyth[MLBteams_pyth$teams == "Indians",]
+mariners <- MLBteams_pyth[MLBteams_pyth$teams == "Mariners",]
+marlins <- MLBteams_pyth[MLBteams_pyth$teams == "Marlins",]
+mets <- MLBteams_pyth[MLBteams_pyth$teams == "Mets",]
+nationals <- MLBteams_pyth[MLBteams_pyth$teams == "Nationals",]
+padres <- MLBteams_pyth[MLBteams_pyth$teams == "Padres",]
+phillies <- MLBteams_pyth[MLBteams_pyth$teams == "Phillies",]
+pirates <- MLBteams_pyth[MLBteams_pyth$teams == "Pirates",]
+rangers <- MLBteams_pyth[MLBteams_pyth$teams == "Rangers",]
+reds <- MLBteams_pyth[MLBteams_pyth$teams == "Reds",]
+rockies <- MLBteams_pyth[MLBteams_pyth$teams == "Rockies",]
+royals <- MLBteams_pyth[MLBteams_pyth$teams == "Royals",]
+tigers <- MLBteams_pyth[MLBteams_pyth$teams == "Tigers",]
+twins <- MLBteams_pyth[MLBteams_pyth$teams == "Twins",]
+whitesox <- MLBteams_pyth[MLBteams_pyth$teams == "White Sox",]
+
+###desired number of simulations
+#use set seed for repeatable results
+
+num_simulations<-100
+final.results <- data.frame(replicate(length(ALeast),sample(0:48,num_simulations,rep=TRUE)))
+colnames(final.results)<-ALeast
+
+###create season schedule
+##AL and NL intra-division games
+
+for(i in 1:num_simulations){
+  
+  make_schedule_ALeast <- function(teams_ALeast, k) {
+    n.teams_ALeast <- length(teams_ALeast)
+    Home <- rep(rep(teams_ALeast, each = n.teams_ALeast), k)
+    Visitor <- rep(rep(teams_ALeast, n.teams_ALeast), k)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  ALeast<-c("Blue_Jays", "Orioles", "Rays", "Red_Sox", "Yankees")
+  teams_ALeast<- c(ALeast)
+  
+  
+  make_schedule_ALcentral <- function(teams_ALcentral, kk) {
+    n.teams_ALcentral <- length(teams_ALcentral)
+    Home <- rep(rep(teams_ALcentral, each = n.teams_ALcentral), kk)
+    Visitor <- rep(rep(teams_ALcentral, n.teams_ALcentral), kk)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  ALcentral<-c("Indians", "Royals", "Tigers", "Twins", "White_Sox")
+  teams_ALcentral<- c(ALcentral)
+  
+  make_schedule_ALwest<- function(teams_ALwest, kkk) {
+    n.teams_ALwest <- length(teams_ALwest)
+    Home <- rep(rep(teams_ALwest, each = n.teams_ALwest), kkk)
+    Visitor <- rep(rep(teams_ALwest, n.teams_ALwest), kkk)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  ALwest<-c("Angels", "Astros", "Athletics", "Mariners", "Rangers")
+  teams_ALwest<- c(ALwest)
+  
+  make_schedule_NLeast<- function(teams_NLeast, kkkk) {
+    n.teams_NLeast <- length(teams_NLeast)
+    Home <- rep(rep(teams_NLeast, each = n.teams_NLeast), kkkk)
+    Visitor <- rep(rep(teams_NLeast, n.teams_NLeast), kkkk)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  NLeast<-c("Braves", "Marlins", "Mets", "Nationals", "Phillies")
+  teams_NLeast<- c(NLeast)
+  
+  make_schedule_NLcentral<- function(teams_NLcentral, kkkkk) {
+    n.teams_NLcentral <- length(teams_NLcentral)
+    Home <- rep(rep(teams_NLcentral, each = n.teams_NLcentral), kkkkk)
+    Visitor <- rep(rep(teams_NLcentral, n.teams_NLcentral), kkkkk)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  NLcentral<-c("Brewers", "Cardinals", "Cubs", "Pirates", "Reds")
+  teams_NLcentral<- c(NLcentral)
+  
+  make_schedule_NLwest<- function(teams_NLwest, kkkkkk) {
+    n.teams_NLwest <- length(teams_NLwest)
+    Home <- rep(rep(teams_NLwest, each = n.teams_NLwest), kkkkkk)
+    Visitor <- rep(rep(teams_NLwest, n.teams_NLwest), kkkkkk)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  NLwest<-c("Diamondbacks", "Dodgers", "Giants", "Padres", "Rockies")
+  teams_NLwest<- c(NLwest)
+  
+  make_schedule_ALall<- function(teams_ALall, l) {
+    n.teams_ALall <- length(teams_ALall)
+    Home <- rep(rep(teams_ALall, each = n.teams_ALall), l)
+    Visitor <- rep(rep(teams_ALall, n.teams_ALall), l)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+
+##AL and NL inter-division games
+  
+    ALall<-c("Blue_Jays", "Orioles", "Rays", "Red_Sox", "Yankees", "Indians", "Royals", "Tigers", "Twins", "White_Sox", "Angels", "Astros", "Athletics", "Mariners", "Rangers")
+  teams_ALall<- c(ALall)
+  
+  make_schedule_NLall<- function(teams_NLall, m) {
+    n.teams_NLall <- length(teams_NLall)
+    Home <- rep(rep(teams_NLall, each = n.teams_NLall), m)
+    Visitor <- rep(rep(teams_NLall, n.teams_NLall), m)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+
+##inter-league games
+  
+    NLall<-c("Braves", "Marlins", "Mets", "Nationals", "Phillies", "Brewers", "Cardinals", "Cubs", "Pirates", "Reds", "Diamondbacks", "Dodgers", "Giants", "Padres", "Rockies")
+  teams_NLall<- c(NLall)
+  
+  teams<-c("Blue_Jays", "Orioles", "Rays", "Red_Sox", "Yankees", "Angels","Astros","Athletics","Braves", "Brewers", "Cardinals", "Cubs", "Diamondbacks", "Dodgers", "Giants", "Indians", "Mariners", "Marlins", "Mets", "Nationals", "Padres", "Phillies", "Pirates", "Rangers","Reds", "Rockies","Royals", "Tigers", "Twins", "White_Sox") 
+  
+  division<-c(1,1,1,1,1,3,3,3,4,5,5,5,6,6,6,2,3,4,4,4,6,4,5,3,5,6,2,2,2,2)
+  league<-c(1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1,1,2,2,1,1,1)
+  
+  make_schedule_raysmarlins<- function(teams_raysmarlins, nn) {
+    n.teams_raysmarlins <- length(teams_raysmarlins)
+    Home <- rep(rep(teams_raysmarlins, each = n.teams_raysmarlins), nn)
+    Visitor <- rep(rep(teams_raysmarlins, n.teams_raysmarlins), nn)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  raysmarlins<-c("Rays", "Marlins")
+  teams_raysmarlins<- c(raysmarlins)
+  
+  make_schedule_raysdodgers<- function(teams_raysdodgers, oo) {
+    n.teams_raysdodgers <- length(teams_raysdodgers)
+    Home <- rep(rep(teams_raysdodgers, each = n.teams_raysdodgers), oo)
+    Visitor <- rep(rep(teams_raysdodgers, n.teams_raysdodgers), oo)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  raysdodgers<-c("Rays", "Dodgers")
+  teams_raysdodgers<- c(raysdodgers)
+  
+  make_schedule_raysrockies<- function(teams_raysrockies, pp) {
+    n.teams_raysrockies <- length(teams_raysrockies)
+    Home <- rep(rep(teams_raysrockies, each = n.teams_raysrockies), pp)
+    Visitor <- rep(rep(teams_raysrockies, n.teams_raysrockies), pp)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  raysrockies<-c("Rays", "Rockies")
+  teams_raysrockies<- c(raysrockies)
+  
+  make_schedule_raysgiants<- function(teams_raysgiants, qq) {
+    n.teams_raysgiants <- length(teams_raysgiants)
+    Home <- rep(rep(teams_raysgiants, each = n.teams_raysgiants), qq)
+    Visitor <- rep(rep(teams_raysgiants, n.teams_raysgiants), qq)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  raysgiants<-c("Rays", "Giants")
+  teams_raysgiants<- c(raysgiants)
+  
+  make_schedule_raysdiamondbacks<- function(teams_raysdiamondbacks, rr) {
+    n.teams_raysdiamondbacks <- length(teams_raysdiamondbacks)
+    Home <- rep(rep(teams_raysdiamondbacks, each = n.teams_raysdiamondbacks), rr)
+    Visitor <- rep(rep(teams_raysdiamondbacks, n.teams_raysdiamondbacks), rr)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  raysdiamondbacks<-c("Rays", "Diamondbacks")
+  teams_raysdiamondbacks<- c(raysdiamondbacks)
+  
+  make_schedule_rayspadres<- function(teams_rayspadres, ss) {
+    n.teams_rayspadres <- length(teams_rayspadres)
+    Home <- rep(rep(teams_rayspadres, each = n.teams_rayspadres), ss)
+    Visitor <- rep(rep(teams_rayspadres, n.teams_rayspadres), ss)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rayspadres<-c("Rays", "Padres")
+  teams_rayspadres<- c(rayspadres)
+  
+  make_schedule_oriolesrockies<- function(teams_oriolesrockies, tt) {
+    n.teams_oriolesrockies <- length(teams_oriolesrockies)
+    Home <- rep(rep(teams_oriolesrockies, each = n.teams_oriolesrockies), tt)
+    Visitor <- rep(rep(teams_oriolesrockies, n.teams_oriolesrockies), tt)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  oriolesrockies<-c("Orioles", "Rockies")
+  teams_oriolesrockies<- c(oriolesrockies)
+  
+  make_schedule_oriolesgiants<- function(teams_oriolesgiants, uu) {
+    n.teams_oriolesgiants <- length(teams_oriolesgiants)
+    Home <- rep(rep(teams_oriolesgiants, each = n.teams_oriolesgiants), uu)
+    Visitor <- rep(rep(teams_oriolesgiants, n.teams_oriolesgiants), uu)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  oriolesgiants<-c("Orioles", "Giants")
+  teams_oriolesgiants<- c(oriolesgiants)
+  
+  make_schedule_oriolespadres<- function(teams_oriolespadres, vv) {
+    n.teams_oriolespadres <- length(teams_oriolespadres)
+    Home <- rep(rep(teams_oriolespadres, each = n.teams_oriolespadres), vv)
+    Visitor <- rep(rep(teams_oriolespadres, n.teams_oriolespadres), vv)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  oriolespadres<-c("Orioles", "Padres")
+  teams_oriolespadres<- c(oriolespadres)
+  
+  make_schedule_oriolesnationals<- function(teams_oriolesnationals, ww) {
+    n.teams_oriolesnationals <- length(teams_oriolesnationals)
+    Home <- rep(rep(teams_oriolesnationals, each = n.teams_oriolesnationals), ww)
+    Visitor <- rep(rep(teams_oriolesnationals, n.teams_oriolesnationals), ww)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  oriolesnationals<-c("Orioles", "Nationals")
+  teams_oriolesnationals<- c(oriolesnationals)
+  
+  make_schedule_oriolesdiamondbacks<- function(teams_oriolesdiamondbacks, xx) {
+    n.teams_oriolesdiamondbacks <- length(teams_oriolesdiamondbacks)
+    Home <- rep(rep(teams_oriolesdiamondbacks, each = n.teams_oriolesdiamondbacks), xx)
+    Visitor <- rep(rep(teams_oriolesdiamondbacks, n.teams_oriolesdiamondbacks), xx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  oriolesdiamondbacks<-c("Orioles", "Diamondbacks")
+  teams_oriolesdiamondbacks<- c(oriolesdiamondbacks)
+  
+  make_schedule_oriolesdodgers<- function(teams_oriolesdodgers, yy) {
+    n.teams_oriolesdodgers <- length(teams_oriolesdodgers)
+    Home <- rep(rep(teams_oriolesdodgers, each = n.teams_oriolesdodgers), yy)
+    Visitor <- rep(rep(teams_oriolesdodgers, n.teams_oriolesdodgers), yy)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  oriolesdodgers<-c("Orioles", "Dodgers")
+  teams_oriolesdodgers<- c(oriolesdodgers)
+  
+  make_schedule_redsoxdiamondbacks<- function(teams_oriolesdodgers, zz) {
+    n.teams_redsoxdiamondbacks <- length(teams_redsoxdiamondbacks)
+    Home <- rep(rep(teams_redsoxdiamondbacks, each = n.teams_redsoxdiamondbacks), zz)
+    Visitor <- rep(rep(teams_redsoxdiamondbacks, n.teams_redsoxdiamondbacks), zz)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  redsoxdiamondbacks<-c("Red_Sox", "Diamondbacks")
+  teams_redsoxdiamondbacks<- c(redsoxdiamondbacks)
+  
+  make_schedule_redsoxrockies<- function(teams_redsoxrockies, aa) {
+    n.teams_redsoxrockies <- length(teams_redsoxrockies)
+    Home <- rep(rep(teams_redsoxrockies, each = n.teams_redsoxrockies), aa)
+    Visitor <- rep(rep(teams_redsoxrockies, n.teams_redsoxrockies), aa)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  redsoxrockies<-c("Red_Sox", "Rockies")
+  teams_redsoxrockies<- c(redsoxrockies)
+  
+  make_schedule_redsoxdodgers<- function(teams_redsoxdodgers, bb) {
+    n.teams_redsoxdodgers <- length(teams_redsoxdodgers)
+    Home <- rep(rep(teams_redsoxdodgers, each = n.teams_redsoxdodgers), bb)
+    Visitor <- rep(rep(teams_redsoxdodgers, n.teams_redsoxdodgers), bb)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  redsoxdodgers<-c("Red_Sox", "Dodgers")
+  teams_redsoxdodgers<- c(redsoxdodgers)
+  
+  make_schedule_redsoxpadres<- function(teams_redsoxpadres, cc) {
+    n.teams_redsoxpadres <- length(teams_redsoxpadres)
+    Home <- rep(rep(teams_redsoxpadres, each = n.teams_redsoxpadres), cc)
+    Visitor <- rep(rep(teams_redsoxpadres, n.teams_redsoxpadres), cc)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  redsoxpadres<-c("Red_Sox", "Padres")
+  teams_redsoxpadres<- c(redsoxpadres)
+  
+  make_schedule_redsoxphillies<- function(teams_redsoxphillies, dd) {
+    n.teams_redsoxphillies <- length(teams_redsoxphillies)
+    Home <- rep(rep(teams_redsoxphillies, each = n.teams_redsoxphillies), dd)
+    Visitor <- rep(rep(teams_redsoxphillies, n.teams_redsoxphillies), dd)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  redsoxphillies<-c("Red_Sox", "Phillies")
+  teams_redsoxphillies<- c(redsoxphillies)
+  
+  make_schedule_redsoxgiants<- function(teams_redsoxgiants, ff) {
+    n.teams_redsoxgiants <- length(teams_redsoxgiants)
+    Home <- rep(rep(teams_redsoxgiants, each = n.teams_redsoxgiants), ff)
+    Visitor <- rep(rep(teams_redsoxgiants, n.teams_redsoxgiants), ff)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  
+  redsoxgiants<-c("Red_Sox", "Giants")
+  teams_redsoxgiants<- c(redsoxgiants)
+  
+  make_schedule_yankeesgiants<- function(teams_yankeesgiants, aza) {
+    n.teams_yankeesgiants <- length(teams_yankeesgiants)
+    Home <- rep(rep(teams_yankeesgiants, each = n.teams_yankeesgiants), aza)
+    Visitor <- rep(rep(teams_yankeesgiants, n.teams_yankeesgiants), aza)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  
+  yankeesgiants<-c("Yankees", "Giants")
+  teams_yankeesgiants<- c(yankeesgiants)
+  
+  make_schedule_yankeesdiamondbacks<- function(teams_yankeesdiamondbacks, gg) {
+    n.teams_yankeesdiamondbacks <- length(teams_yankeesdiamondbacks)
+    Home <- rep(rep(teams_yankeesdiamondbacks, each = n.teams_yankeesdiamondbacks), gg)
+    Visitor <- rep(rep(teams_yankeesdiamondbacks, n.teams_yankeesdiamondbacks), gg)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  yankeesdiamondbacks<-c("Yankees", "Diamondbacks")
+  teams_yankeesdiamondbacks<- c(yankeesdiamondbacks)
+  
+  make_schedule_yankeespadres<- function(teams_yankeespadres, hh) {
+    n.teams_yankeespadres <- length(teams_yankeespadres)
+    Home <- rep(rep(teams_yankeespadres, each = n.teams_yankeespadres), hh)
+    Visitor <- rep(rep(teams_yankeespadres, n.teams_yankeespadres), hh)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  yankeespadres<-c("Yankees", "Padres")
+  teams_yankeespadres<- c(yankeespadres)
+  
+  make_schedule_yankeesmets<- function(teams_yankeesmets, ii) {
+    n.teams_yankeesmets<- length(teams_yankeesmets)
+    Home <- rep(rep(teams_yankeesmets, each = n.teams_yankeesmets), ii)
+    Visitor <- rep(rep(teams_yankeesmets, n.teams_yankeesmets), ii)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  yankeesmets<-c("Yankees", "Mets")
+  teams_yankeesmets<- c(yankeesmets)
+  
+  make_schedule_yankeesrockies<- function(teams_yankeesrockies, jj) {
+    n.teams_yankeesrockies<- length(teams_yankeesrockies)
+    Home <- rep(rep(teams_yankeesrockies, each = n.teams_yankeesrockies), jj)
+    Visitor <- rep(rep(teams_yankeesrockies, n.teams_yankeesrockies), jj)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  yankeesrockies<-c("Yankees", "Rockies")
+  teams_yankeesrockies<- c(yankeesrockies)
+  
+  make_schedule_yankeesdodgers<- function(teams_yankeesdodgers, aaa) {
+    n.teams_yankeesdodgers<- length(teams_yankeesdodgers)
+    Home <- rep(rep(teams_yankeesdodgers, each = n.teams_yankeesdodgers), aaa)
+    Visitor <- rep(rep(teams_yankeesdodgers, n.teams_yankeesdodgers), aaa)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  yankeesdodgers<-c("Yankees", "Dodgers")
+  yankeesdodgers<- c(yankeesdodgers)
+  
+  make_schedule_jaysgiants<- function(teams_jaysgiants, bbb) {
+    n.teams_jaysgiants<- length(teams_jaysgiants)
+    Home <- rep(rep(teams_jaysgiants, each = n.teams_jaysgiants),bbb)
+    Visitor <- rep(rep(teams_jaysgiants, n.teams_jaysgiants), bbb)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  jaysgiants<-c("Blue_Jays", "Giants")
+  jaysgiants<- c(jaysgiants)
+  
+  make_schedule_jayspadres<- function(teams_jayspadres, ccc) {
+    n.teams_jayspadres<- length(teams_jayspadres)
+    Home <- rep(rep(teams_jayspadres, each = n.teams_jayspadres), ccc)
+    Visitor <- rep(rep(teams_jayspadres, n.teams_jayspadres), ccc)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  jayspadres<-c("Blue_Jays", "Padres")
+  jayspadres<- c(jayspadres)
+  
+  make_schedule_jaysrockies<- function(teams_jaysrockies, ddd) {
+    n.teams_jaysrockies<- length(teams_jaysrockies)
+    Home <- rep(rep(teams_jaysrockies, each = n.teams_jaysrockies), ddd)
+    Visitor <- rep(rep(teams_jaysrockies, n.teams_jaysrockies), ddd)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  jaysrockies<-c("Blue_Jays", "Rockies")
+  jaysrockies<- c(jaysrockies)
+  
+  make_schedule_jaysdodgers<- function(teams_jaysdodgers, eee) {
+    n.teams_jaysdodgers<- length(teams_jaysdodgers)
+    Home <- rep(rep(teams_jaysdodgers, each = n.teams_jaysdodgers), eee)
+    Visitor <- rep(rep(teams_jaysdodgers, n.teams_jaysdodgers), eee)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  jaysdodgers<-c("Blue_Jays", "Dodgers")
+  jaysdodgers<- c(jaysdodgers)
+  
+  make_schedule_jaysbraves<- function(teams_jaysbraves, fff) {
+    n.teams_jaysbraves<- length(teams_jaysbraves)
+    Home <- rep(rep(teams_jaysbraves, each = n.teams_jaysbraves), fff)
+    Visitor <- rep(rep(teams_jaysbraves, n.teams_jaysbraves), fff)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  jaysbraves<-c("Blue_Jays", "Braves")
+  jaysbraves<- c(jaysbraves)
+  
+  make_schedule_jaysdiamondbacks<- function(teams_jaysdiamondbacks, ggg) {
+    n.teams_jaysdiamondbacks<- length(teams_jaysdiamondbacks)
+    Home <- rep(rep(teams_jaysdiamondbacks, each = n.teams_jaysdiamondbacks), ggg)
+    Visitor <- rep(rep(teams_jaysdiamondbacks, n.teams_jaysdiamondbacks), ggg)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  jaysdiamondbacks<-c("Blue_Jays", "Diamondbacks")
+  jaysdiamondbacks<- c(jaysdiamondbacks)
+  
+  make_schedule_whitesoxnationals<- function(teams_whitesoxnationals, hhh) {
+    n.teams_whitesoxnationals<- length(teams_whitesoxnationals)
+    Home <- rep(rep(teams_whitesoxnationals, each = n.teams_whitesoxnationals), hhh)
+    Visitor <- rep(rep(teams_whitesoxnationals, n.teams_whitesoxnationals), hhh)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  whitesoxnationals<-c("White_Sox", "Nationals")
+  whitesoxnationals<- c(whitesoxnationals)
+  
+  make_schedule_whitesoxcubs<- function(teams_whitesoxcubs, iii) {
+    n.teams_whitesoxcubs<- length(teams_whitesoxcubs)
+    Home <- rep(rep(teams_whitesoxcubs, each = n.teams_whitesoxcubs), iii)
+    Visitor <- rep(rep(teams_whitesoxcubs, n.teams_whitesoxcubs), iii)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  whitesoxcubs<-c("White_Sox", "Cubs")
+  whitesoxcubs<- c(whitesoxcubs)
+  
+  make_schedule_whitesoxmarlins<- function(teams_whitesoxmarlins, jjj) {
+    n.teams_whitesoxmarlins<- length(teams_whitesoxmarlins)
+    Home <- rep(rep(teams_whitesoxmarlins, each = n.teams_whitesoxmarlins), jjj)
+    Visitor <- rep(rep(teams_whitesoxmarlins, n.teams_whitesoxmarlins), jjj)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  whitesoxmarlins<-c("White_Sox", "Marlins")
+  whitesoxmarlins<- c(whitesoxmarlins)
+  
+  make_schedule_whitesoxmets<- function(teams_whitesoxmets, lll) {
+    n.teams_whitesoxmets<- length(teams_whitesoxmets)
+    Home <- rep(rep(teams_whitesoxmets, each = n.teams_whitesoxmets), lll)
+    Visitor <- rep(rep(teams_whitesoxmets, n.teams_whitesoxmets), lll)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  whitesoxmets<-c("White_Sox", "Mets")
+  whitesoxmets<- c(whitesoxmets)
+  
+  make_schedule_whitesoxphillies<- function(teams_whitesoxphillies, mmm) {
+    n.teams_whitesoxphillies<- length(teams_whitesoxphillies)
+    Home <- rep(rep(teams_whitesoxphillies, each = n.teams_whitesoxphillies), mmm)
+    Visitor <- rep(rep(teams_whitesoxphillies, n.teams_whitesoxphillies), mmm)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  whitesoxphillies<-c("White_Sox", "Phillies")
+  whitesoxphillies<- c(whitesoxphillies)
+  
+  make_schedule_whitesoxbraves<- function(teams_whitesoxbraves, nnn) {
+    n.teams_whitesoxbraves<- length(teams_whitesoxbraves)
+    Home <- rep(rep(teams_whitesoxbraves, each = n.teams_whitesoxbraves), nnn)
+    Visitor <- rep(rep(teams_whitesoxbraves, n.teams_whitesoxbraves), nnn)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  whitesoxbraves<-c("White_Sox", "Braves")
+  whitesoxbraves<- c(whitesoxbraves)
+  
+  make_schedule_indiansbraves<- function(teams_indiansbraves, ooo) {
+    n.teams_indiansbraves<- length(teams_indiansbraves)
+    Home <- rep(rep(teams_indiansbraves, each = n.teams_indiansbraves), ooo)
+    Visitor <- rep(rep(teams_indiansbraves, n.teams_indiansbraves), ooo)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  indiansbraves<-c("Indians", "Braves")
+  indiansbraves<- c(indiansbraves)
+  
+  make_schedule_indiansmarlins<- function(teams_indiansmarlins, ppp) {
+    n.teams_indiansmarlins<- length(teams_indiansmarlins)
+    Home <- rep(rep(teams_indiansmarlins, each = n.teams_indiansmarlins), ppp)
+    Visitor <- rep(rep(teams_indiansmarlins, n.teams_indiansmarlins), ppp)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  indiansmarlins<-c("Indians", "Marlins")
+  indiansmarlins<- c(indiansmarlins)
+  
+  make_schedule_indiansreds<- function(teams_indiansreds, qqq) {
+    n.teams_indiansreds<- length(teams_indiansreds)
+    Home <- rep(rep(teams_indiansreds, each = n.teams_indiansreds), qqq)
+    Visitor <- rep(rep(teams_indiansreds, n.teams_indiansreds), qqq)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  indiansreds<-c("Indians", "Reds")
+  indiansreds<- c(indiansreds)
+  
+  make_schedule_indiansmets<- function(teams_indiansmets, rrr) {
+    n.teams_indiansmets<- length(teams_indiansmets)
+    Home <- rep(rep(teams_indiansmets, each = n.teams_indiansmets), rrr)
+    Visitor <- rep(rep(teams_indiansmets, n.teams_indiansmets),rrr)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  indiansmets<-c("Indians", "Mets")
+  indiansmets<- c(indiansmets)
+  
+  make_schedule_indiansphillies<- function(teams_indiansphillies, sss) {
+    n.teams_indiansphillies<- length(teams_indiansphillies)
+    Home <- rep(rep(teams_indiansphillies, each = n.teams_indiansphillies), sss)
+    Visitor <- rep(rep(teams_indiansphillies, n.teams_indiansphillies), sss)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  indiansphillies<-c("Indians", "Phillies")
+  indiansphillies<- c(indiansphillies)
+  
+  make_schedule_indiansnationals<- function(teams_indiansnationals, ttt) {
+    n.teams_indiansnationals<- length(teams_indiansnationals)
+    Home <- rep(rep(teams_indiansnationals, each = n.teams_indiansnationals), ttt)
+    Visitor <- rep(rep(teams_indiansnationals, n.teams_indiansnationals), ttt)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  indiansnationals<-c("Indians", "Nationals")
+  indiansnationals<- c(indiansnationals)
+  
+  make_schedule_tigerspirates<- function(teams_tigerspirates,uuu) {
+    n.teams_tigerspirates<- length(teams_tigerspirates)
+    Home <- rep(rep(teams_tigerspirates, each = n.teams_tigerspirates), uuu)
+    Visitor <- rep(rep(teams_tigerspirates, n.teams_tigerspirates), uuu)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  tigerspirates<-c("Tigers", "Pirates")
+  tigerspirates<- c(tigerspirates)
+  
+  make_schedule_tigersphillies<- function(teams_tigersphillies,vvv) {
+    n.teams_tigersphillies<- length(teams_tigersphillies)
+    Home <- rep(rep(teams_tigersphillies, each = n.teams_tigersphillies), vvv)
+    Visitor <- rep(rep(teams_tigersphillies, n.teams_tigersphillies), vvv)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  tigersphillies<-c("Tigers", "Phillies")
+  tigersphillies<- c(tigersphillies)
+  
+  make_schedule_tigersmarlins<- function(teams_tigersmarlins,www) {
+    n.teams_tigersmarlins<- length(teams_tigersmarlins)
+    Home <- rep(rep(teams_tigersmarlins, each = n.teams_tigersmarlins), www)
+    Visitor <- rep(rep(teams_tigersmarlins, n.teams_tigersmarlins), www)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  tigersmarlins<-c("Tigers","Marlins")
+  tigersmarlins<- c(tigersmarlins)
+  
+  make_schedule_tigersmets<- function(teams_tigersmets,yyy) {
+    n.teams_tigersmets<- length(teams_tigersmets)
+    Home <- rep(rep(teams_tigersmets, each = n.teams_tigersmets), yyy)
+    Visitor <- rep(rep(teams_tigersmets, n.teams_tigersmets), yyy)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  tigersmets<-c("Tigers", "Mets")
+  tigersmets<- c(tigersmets)
+  
+  make_schedule_tigersbraves<- function(teams_tigersbraves,zzz) {
+    n.teams_tigersbraves<- length(teams_tigersbraves)
+    Home <- rep(rep(teams_tigersbraves, each = n.teams_tigersbraves), zzz)
+    Visitor <- rep(rep(teams_tigersbraves, n.teams_tigersbraves), zzz)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  tigersbraves<-c("Tigers", "Braves")
+  tigersbraves<- c(tigersbraves)
+  
+  make_schedule_tigersnationals<- function(teams_tigersnationals,aaax) {
+    n.teams_tigersnationals<- length(teams_tigersnationals)
+    Home <- rep(rep(teams_tigersnationals, each = n.teams_tigersnationals), aaax)
+    Visitor <- rep(rep(teams_tigersnationals, n.teams_tigersnationals), aaax)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  tigersnationals<-c("Tigers", "Nationals")
+  tigersnationals<- c(tigersnationals)
+  
+  make_schedule_royalsphillies<- function(teams_royalsphillies,bbbx) {
+    n.teams_royalsphillies<- length(teams_royalsphillies)
+    Home <- rep(rep(teams_royalsphillies, each = n.teams_royalsphillies), bbbx)
+    Visitor <- rep(rep(teams_royalsphillies, n.teams_royalsphillies), bbbx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  royalsphillies<-c("Royals", "Phillies")
+  royalsphillies<- c(royalsphillies)
+  
+  make_schedule_royalscardinals<- function(teams_royalscardinals,cccx) {
+    n.teams_royalscardinals<- length(teams_royalscardinals)
+    Home <- rep(rep(teams_royalscardinals, each = n.teams_royalscardinals), cccx)
+    Visitor <- rep(rep(teams_royalscardinals, n.teams_royalscardinals), cccx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  royalscardinals<-c("Royals", "Cardinals")
+  royalscardinals<- c(royalscardinals)
+  
+  make_schedule_royalsnationals<- function(teams_royalsnationals,dddx) {
+    n.teams_royalsnationals<- length(teams_royalsnationals)
+    Home <- rep(rep(teams_royalsnationals, each = n.teams_royalsnationals), dddx)
+    Visitor <- rep(rep(teams_royalsnationals, n.teams_royalsnationals),dddx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  royalsnationals<-c("Royals", "Nationals")
+  royalsnationals<- c(royalsnationals)
+  
+  make_schedule_royalsbraves<- function(teams_royalsbraves,eeex) {
+    n.teams_royalsbraves<- length(teams_royalsbraves)
+    Home <- rep(rep(teams_royalsbraves, each = n.teams_royalsbraves), eeex)
+    Visitor <- rep(rep(teams_royalsbraves, n.teams_royalsbraves), eeex)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  royalsbraves<-c("Royals", "Braves")
+  royalsbraves<- c(royalsbraves)
+  
+  make_schedule_royalsmets<- function(teams_royalsmets,fffx) {
+    n.teams_royalsmets<- length(teams_royalsmets)
+    Home <- rep(rep(teams_royalsmets, each = n.teams_royalsmets), fffx)
+    Visitor <- rep(rep(teams_royalsmets, n.teams_royalsmets), fffx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  royalsmets<-c("Royals", "Mets")
+  royalsmets<- c(royalsmets)
+  
+  make_schedule_royalsmarlins<- function(teams_royalsmarlins,gggx) {
+    n.teams_royalsmarlins<- length(teams_royalsmarlins)
+    Home <- rep(rep(teams_royalsmarlins, each = n.teams_royalsmarlins), gggx)
+    Visitor <- rep(rep(teams_royalsmarlins, n.teams_royalsmarlins), gggx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  royalsmarlins<-c("Royals", "Marlins")
+  royalsmarlins<- c(royalsmarlins)
+  
+  make_schedule_twinsphillies<- function(teams_twinsphillies,hhhx) {
+    n.teams_twinsphillies<- length(teams_twinsphillies)
+    Home <- rep(rep(teams_twinsphillies, each = n.teams_twinsphillies), hhhx)
+    Visitor <- rep(rep(teams_twinsphillies, n.teams_twinsphillies), hhhx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  twinsphillies<-c("Twins", "Phillies")
+  twinsphillies<- c(twinsphillies)
+  
+  make_schedule_twinsmets<- function(teams_twinsmets,iiix) {
+    n.teams_twinsmets<- length(teams_twinsmets)
+    Home <- rep(rep(teams_twinsmets, each = n.teams_twinsmets), iiix)
+    Visitor <- rep(rep(teams_twinsmets, n.teams_twinsmets), iiix)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  twinsmets<-c("Twins", "Mets")
+  twinsmets<- c(twinsmets)
+  
+  make_schedule_twinsnationals<- function(teams_twinsnationals,jjjx) {
+    n.teams_twinsnationals<- length(teams_twinsnationals)
+    Home <- rep(rep(teams_twinsnationals, each = n.teams_twinsnationals), jjjx)
+    Visitor <- rep(rep(teams_twinsnationals, n.teams_twinsnationals), jjjx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  twinsnationals<-c("Twins", "Nationals")
+  twinsnationals<- c(twinsnationals)
+  
+  make_schedule_twinsbrewers<- function(teams_twinsbrewers,zxa) {
+    n.teams_twinsbrewers<- length(teams_twinsbrewers)
+    Home <- rep(rep(teams_twinsbrewers, each = n.teams_twinsbrewers), zxa)
+    Visitor <- rep(rep(teams_twinsbrewers, n.teams_twinsbrewers), zxa)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  twinsbrewers<-c("Twins", "Brewers")
+  twinsbrewers<- c(twinsbrewers)
+  
+  make_schedule_twinsmarlins<- function(teams_twinsmarlins,jtjx) {
+    n.teams_twinsmarlins<- length(teams_twinsmarlins)
+    Home <- rep(rep(teams_twinsmarlins, each = n.teams_twinsmarlins), jtjx)
+    Visitor <- rep(rep(teams_twinsmarlins, n.teams_twinsmarlins), jtjx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  twinsmarlins<-c("Twins", "Marlins")
+  twinsmarlins<- c(twinsmarlins)
+  
+  make_schedule_twinsbraves<- function(teams_twinsbraves,lllx) {
+    n.teams_twinsbraves<- length(teams_twinsbraves)
+    Home <- rep(rep(teams_twinsbraves, each = n.teams_twinsbraves), lllx)
+    Visitor <- rep(rep(teams_twinsbraves, n.teams_twinsbraves), lllx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  twinsbraves<-c("Twins", "Braves")
+  twinsbraves<- c(twinsbraves)
+  
+  make_schedule_astroscubs<- function(teams_astroscubs,mmmx) {
+    n.teams_astroscubs<- length(teams_astroscubs)
+    Home <- rep(rep(teams_astroscubs, each = n.teams_astroscubs), mmmx)
+    Visitor <- rep(rep(teams_astroscubs, n.teams_astroscubs), mmmx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  astroscubs<-c("Astros", "Cubs")
+  astroscubs<- c(astroscubs)
+  
+  make_schedule_astrosbrewers<- function(teams_astrosbrewers,nnnx) {
+    n.teams_astrosbrewers<- length(teams_astrosbrewers)
+    Home <- rep(rep(teams_astrosbrewers, each = n.teams_astrosbrewers),nnnx)
+    Visitor <- rep(rep(teams_astrosbrewers, n.teams_astrosbrewers), nnnx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  astrosbrewers<-c("Astros", "Brewers")
+  astrosbrewers<- c(astrosbrewers)
+  
+  make_schedule_astrosreds<- function(teams_astrosreds,ooox) {
+    n.teams_astrosreds<- length(teams_astrosreds)
+    Home <- rep(rep(teams_astrosreds, each = n.teams_astrosreds), ooox)
+    Visitor <- rep(rep(teams_astrosreds, n.teams_astrosreds), ooox)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  astrosreds<-c("Astros", "Reds")
+  astrosreds<- c(astrosreds)
+  
+  make_schedule_astrospirates<- function(teams_astrospirates,pppx) {
+    n.teams_astrospirates<- length(teams_astrospirates)
+    Home <- rep(rep(teams_astrospirates, each = n.teams_astrospirates), pppx)
+    Visitor <- rep(rep(teams_astrospirates, n.teams_astrospirates), pppx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  astrospirates<-c("Astros", "Pirates")
+  astrospirates<- c(astrospirates)
+  
+  make_schedule_astrosrockies<- function(teams_astrosrockies,qqqx) {
+    n.teams_astrosrockies<- length(teams_astrosrockies)
+    Home <- rep(rep(teams_astrosrockies, each = n.teams_astrosrockies),qqqx)
+    Visitor <- rep(rep(teams_astrosrockies, n.teams_astrosrockies), qqqx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  astrosrockies<-c("Astros", "Rockies")
+  astrosrockies<- c(astrosrockies)
+  
+  make_schedule_astroscardinals<- function(teams_astroscardinals,rrrx) {
+    n.teams_astroscardinals<- length(teams_astroscardinals)
+    Home <- rep(rep(teams_astroscardinals, each = n.teams_astroscardinals), rrrx)
+    Visitor <- rep(rep(teams_astroscardinals, n.teams_astroscardinals), rrrx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  astroscardinals<-c("Astros", "Cardinals")
+  astroscardinals<- c(astroscardinals)
+  
+  make_schedule_angelsbrewers<- function(teams_angelsbrewers,sssx) {
+    n.teams_angelsbrewers<- length(teams_angelsbrewers)
+    Home <- rep(rep(teams_angelsbrewers, each = n.teams_angelsbrewers), sssx)
+    Visitor <- rep(rep(teams_angelsbrewers, n.teams_angelsbrewers), sssx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  angelsbrewers<-c("Angels", "Brewers")
+  angelsbrewers<- c(angelsbrewers)
+  
+  make_schedule_angelscubs<- function(teams_angelscubs,tttx) {
+    n.teams_angelscubs<- length(teams_angelscubs)
+    Home <- rep(rep(teams_angelscubs, each = n.teams_angelscubs), tttx)
+    Visitor <- rep(rep(teams_angelscubs, n.teams_angelscubs), tttx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  angelscubs<-c("Angels", "Cubs")
+  angelscubs<- c(angelscubs)
+  
+  make_schedule_angelsdodgers<- function(teams_angelsdodgers,uuux) {
+    n.teams_angelsdodgers<- length(teams_angelsdodgers)
+    Home <- rep(rep(teams_angelsdodgers, each = n.teams_angelsdodgers),uuux)
+    Visitor <- rep(rep(teams_angelsdodgers, n.teams_angelsdodgers), uuux)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  angelsdodgers<-c("Angels", "Dodgers")
+  angelsdodgers<- c(angelsdodgers)
+  
+  make_schedule_angelscardinals<- function(teams_angelscardinals,vvvx) {
+    n.teams_angelscardinals<- length(teams_angelscardinals)
+    Home <- rep(rep(teams_angelscardinals, each = n.teams_angelscardinals), vvvx)
+    Visitor <- rep(rep(teams_angelscardinals, n.teams_angelscardinals), vvvx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  angelscardinals<-c("Angels", "Cardinals")
+  angelscardinals<- c(angelscardinals)
+  
+  make_schedule_angelsreds<- function(teams_angelsreds,wwwx) {
+    n.teams_angelsreds<- length(teams_angelsreds)
+    Home <- rep(rep(teams_angelsreds, each = n.teams_angelsreds),wwwx)
+    Visitor <- rep(rep(teams_angelsreds, n.teams_angelsreds), wwwx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  angelsreds<-c("Angels", "Reds")
+  angelsreds<- c(angelsreds)
+  
+  make_schedule_angelspirates<- function(teams_angelspirates,xxxa) {
+    n.teams_angelspirates<- length(teams_angelspirates)
+    Home <- rep(rep(teams_angelspirates, each = n.teams_angelspirates), xxxa)
+    Visitor <- rep(rep(teams_angelspirates, n.teams_angelspirates), xxxa)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  angelspirates<-c("Angels", "Pirates")
+  angelspirates<- c(angelspirates)
+  
+  make_schedule_athleticspirates<- function(teams_athleticspirates,yyyx) {
+    n.teams_athleticspirates<- length(teams_athleticspirates)
+    Home <- rep(rep(teams_athleticspirates, each = n.teams_athleticspirates), yyyx)
+    Visitor <- rep(rep(teams_athleticspirates, n.teams_athleticspirates), yyyx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  athleticspirates<-c("Athletics", "Pirates")
+  athleticspirates<- c(athleticspirates)
+  
+  
+  make_schedule_athleticsreds<- function(teams_athleticsreds,zzzx) {
+    n.teams_athleticsreds<- length(teams_athleticsreds)
+    Home <- rep(rep(teams_athleticsreds, each = n.teams_athleticsreds), zzzx)
+    Visitor <- rep(rep(teams_athleticsreds, n.teams_athleticsreds), zzzx)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  athleticsreds<-c("Athletics", "Reds")
+  athleticsreds<- c(athleticsreds)
+  
+  make_schedule_athleticscardinals<- function(teams_athleticscardinals,aaaa) {
+    n.teams_athleticscardinals<- length(teams_athleticscardinals)
+    Home <- rep(rep(teams_athleticscardinals, each = n.teams_athleticscardinals), aaaa)
+    Visitor <- rep(rep(teams_athleticscardinals, n.teams_athleticscardinals), aaaa)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  athleticscardinals<-c("Athletics", "Cardinals")
+  athleticscardinals<- c(athleticscardinals)
+  
+  make_schedule_athleticscubs<- function(teams_athleticscubs,bbbb) {
+    n.teams_athleticscubs<- length(teams_athleticscubs)
+    Home <- rep(rep(teams_athleticscubs, each = n.teams_athleticscubs), bbbb)
+    Visitor <- rep(rep(teams_athleticscubs, n.teams_athleticscubs), bbbb)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  athleticscubs<-c("Athletics", "Cubs")
+  athleticscubs<- c(athleticscubs)
+  
+  make_schedule_athleticsgiants<- function(teams_athleticsgiants,cccc) {
+    n.teams_athleticsgiants<- length(teams_athleticsgiants)
+    Home <- rep(rep(teams_athleticsgiants, each = n.teams_athleticsgiants), cccc)
+    Visitor <- rep(rep(teams_athleticsgiants, n.teams_athleticsgiants), cccc)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  athleticsgiants<-c("Athletics", "Giants")
+  athleticsgiants<- c(athleticsgiants)
+  
+  make_schedule_athleticsbrewers<- function(teams_athleticsbrewers,dddd) {
+    n.teams_athleticsbrewers<- length(teams_athleticsbrewers)
+    Home <- rep(rep(teams_athleticsbrewers, each = n.teams_athleticsbrewers), dddd)
+    Visitor <- rep(rep(teams_athleticsbrewers, n.teams_athleticsbrewers), dddd)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  athleticsbrewers<-c("Athletics", "Brewers")
+  athleticsbrewers<- c(athleticsbrewers)
+  
+  make_schedule_marinerscubs<- function(teams_marinerscubs,eeee) {
+    n.teams_marinerscubs<- length(teams_marinerscubs)
+    Home <- rep(rep(teams_marinerscubs, each = n.teams_marinerscubs), eeee)
+    Visitor <- rep(rep(teams_marinerscubs, n.teams_marinerscubs), eeee)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  marinerscubs<-c("Mariners", "Cubs")
+  marinerscubs<- c(marinerscubs)
+  
+  make_schedule_marinerscardinals<- function(teams_marinerscardinals,ffff) {
+    n.teams_marinerscardinals<- length(teams_marinerscardinals)
+    Home <- rep(rep(teams_marinerscardinals, each = n.teams_marinerscardinals), ffff)
+    Visitor <- rep(rep(teams_marinerscardinals, n.teams_marinerscardinals), ffff)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  marinerscardinals<-c("Mariners", "Cardinals")
+  marinerscardinals<- c(marinerscardinals)
+  
+  make_schedule_marinersbrewers<- function(teams_marinersbrewers,gggg) {
+    n.teams_marinersbrewers<- length(teams_marinersbrewers)
+    Home <- rep(rep(teams_marinersbrewers, each = n.teams_marinersbrewers), gggg)
+    Visitor <- rep(rep(teams_marinersbrewers, n.teams_marinersbrewers), gggg)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  marinersbrewers<-c("Mariners", "Brewers")
+  marinersbrewers<- c(marinersbrewers)
+  
+  make_schedule_marinerspadres<- function(teams_marinerspadres,hhhh) {
+    n.teams_marinerspadres<- length(teams_marinerspadres)
+    Home <- rep(rep(teams_marinerspadres, each = n.teams_marinerspadres), hhhh)
+    Visitor <- rep(rep(teams_marinerspadres, n.teams_marinerspadres), hhhh)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  marinerspadres<-c("Mariners", "Padres")
+  marinerspadres<- c(marinerspadres)
+  
+  make_schedule_marinerspirates<- function(teams_marinerspirates,iiii) {
+    n.teams_marinerspirates<- length(teams_marinerspirates)
+    Home <- rep(rep(teams_marinerspirates, each = n.teams_marinerspirates), iiii)
+    Visitor <- rep(rep(teams_marinerspirates, n.teams_marinerspirates), iiii)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  marinerspirates<-c("Mariners", "Pirates")
+  marinerspirates<- c(marinerspirates)
+  
+  make_schedule_rangerscubs<- function(teams_rangerscubs,jjjj) {
+    n.teams_rangerscubs<- length(teams_rangerscubs)
+    Home <- rep(rep(teams_rangerscubs, each = n.teams_rangerscubs), jjjj)
+    Visitor <- rep(rep(teams_rangerscubs, n.teams_rangerscubs), jjjj)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rangerscubs<-c("Rangers", "Cubs")
+  rangerscubs<- c(rangerscubs)
+  
+  make_schedule_rangersdiamondbacks<- function(teams_rangersdiamondbacks,llll) {
+    n.teams_rangersdiamondbacks<- length(teams_rangersdiamondbacks)
+    Home <- rep(rep(teams_rangersdiamondbacks, each = n.teams_rangersdiamondbacks), llll)
+    Visitor <- rep(rep(teams_rangersdiamondbacks, n.teams_rangersdiamondbacks), llll)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rangersdiamondbacks<-c("Rangers", "Diamondbacks")
+  rangersdiamondbacks<- c(rangersdiamondbacks)
+  
+  make_schedule_rangerspirates<- function(teams_rangerspirates,mmmm) {
+    n.teams_rangerspirates<- length(teams_rangerspirates)
+    Home <- rep(rep(teams_rangerspirates, each = n.teams_rangerspirates), mmmm)
+    Visitor <- rep(rep(teams_rangerspirates, n.teams_rangerspirates), mmmm)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rangerspirates<-c("Rangers", "Pirates")
+  rangerspirates<- c(rangerspirates)
+  
+  make_schedule_rangerscardinals<- function(teams_rangerscardinals,nnnn) {
+    n.teams_rangerscardinals<- length(teams_rangerscardinals)
+    Home <- rep(rep(teams_rangerscardinals, each = n.teams_rangerscardinals), nnnn)
+    Visitor <- rep(rep(teams_rangerscardinals, n.teams_rangerscardinals), nnnn)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rangerscardinals<-c("Rangers", "Cardinals")
+  rangerscardinals<- c(rangerscardinals)
+  
+  make_schedule_rangersreds<- function(teams_rangersreds,oooo) {
+    n.teams_rangersreds<- length(teams_rangersreds)
+    Home <- rep(rep(teams_rangersreds, each = n.teams_rangersreds), oooo)
+    Visitor <- rep(rep(teams_rangersreds, n.teams_rangersreds), oooo)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rangersreds<-c("Rangers", "Reds")
+  rangersreds<- c(rangersreds)
+  
+  make_schedule_rangersbrewers<- function(teams_rangersbrewers,pppp) {
+    n.teams_rangersbrewers<- length(teams_rangersbrewers)
+    Home <- rep(rep(teams_rangersbrewers, each = n.teams_rangersbrewers), pppp)
+    Visitor <- rep(rep(teams_rangersbrewers, n.teams_rangersbrewers), pppp)
+    schedule <- tibble(Home = Home, Visitor = Visitor) %>%
+      filter (Home != Visitor)
+  }
+  rangersbrewers<-c("Rangers", "Brewers")
+  rangersbrewers<- c(rangersbrewers)
+  
+  teams<- c("Blue_Jays", "Orioles", "Rays", "Red_Sox", "Yankees", "Indians", "Royals", "Tigers", "Twins",
+            "White_Sox", "Angels", "Astros", "Athletics", "Mariners", "Rangers", "Braves", "Marlins", "Mets",
+            "Nationals", "Phillies", "Brewers", "Cardinals", "Cubs", "Pirates", "Reds", "Diamondbacks", 
+            "Dodgers", "Giants", "Padres", "Rockies")
+  
+  schedule <- bind_rows(make_schedule_ALeast(ALeast,6), make_schedule_ALcentral(ALcentral,6), make_schedule_ALwest(ALwest,6),
+                        make_schedule_NLeast(NLeast,6), make_schedule_NLcentral(NLcentral,6), make_schedule_NLwest(NLwest,6),
+                        make_schedule_ALall(ALall,3), make_schedule_NLall(NLall,3),make_schedule_raysmarlins(raysmarlins,3),
+                        make_schedule_raysdodgers(raysdodgers,3),make_schedule_raysrockies(raysrockies,2),
+                        make_schedule_raysgiants(raysgiants,3), make_schedule_raysdiamondbacks(raysdiamondbacks,2),
+                        make_schedule_rayspadres(rayspadres,2),make_schedule_oriolesrockies(oriolesrockies,3), 
+                        make_schedule_oriolesgiants(oriolesgiants,2),make_schedule_oriolespadres(oriolespadres,3),
+                        make_schedule_oriolesnationals(oriolesnationals,3), make_schedule_oriolesdiamondbacks(oriolesdiamondbacks,2),
+                        make_schedule_oriolesdodgers(oriolesdodgers,2),make_schedule_redsoxdiamondbacks(redsoxdiamondbacks,3),
+                        make_schedule_redsoxrockies(redsoxrockies,3),make_schedule_redsoxdodgers(redsoxdodgers,2),
+                        make_schedule_redsoxpadres(redsoxpadres,2),make_schedule_redsoxphillies(redsoxphillies,3),
+                        make_schedule_redsoxgiants(redsoxgiants,2),make_schedule_yankeesgiants(yankeesgiants,2),
+                        make_schedule_yankeesdiamondbacks(yankeesdiamondbacks,3),make_schedule_yankeespadres(yankeespadres,3),
+                        make_schedule_yankeesmets(yankeesmets,3),make_schedule_yankeesrockies(yankeesrockies,2),
+                        make_schedule_yankeesdodgers(yankeesdodgers,2), make_schedule_jaysgiants(jaysgiants,3), 
+                        make_schedule_jayspadres(jayspadres,2),make_schedule_jaysrockies(jaysrockies,2),
+                        make_schedule_jaysdodgers(jaysdodgers,3),make_schedule_jaysbraves(jaysbraves,3),
+                        make_schedule_jaysdiamondbacks(jaysdiamondbacks,2),make_schedule_whitesoxnationals(whitesoxnationals,3),
+                        make_schedule_whitesoxcubs(whitesoxcubs,3),make_schedule_whitesoxmarlins(whitesoxmarlins,3),
+                        make_schedule_whitesoxmets(whitesoxmets,2),make_schedule_whitesoxphillies(whitesoxphillies,2),
+                        make_schedule_whitesoxbraves(whitesoxbraves,2),make_schedule_indiansbraves(indiansbraves,3),
+                       make_schedule_indiansmarlins(indiansmarlins,3),make_schedule_indiansreds(indiansreds,3),make_schedule_indiansmets(indiansmets,2),
+                       make_schedule_indiansphillies(indiansphillies,2),make_schedule_indiansnationals(indiansnationals,2),
+                       make_schedule_tigerspirates(tigerspirates,3),make_schedule_tigersphillies(tigersphillies,3),make_schedule_tigersmarlins(tigersmarlins,2),
+                       make_schedule_tigersmets(tigersmets,3),make_schedule_tigersbraves(tigersbraves,2),make_schedule_tigersnationals(tigersnationals,2),
+                        make_schedule_royalsphillies(royalsphillies,3),make_schedule_royalscardinals(royalscardinals,3),
+                        make_schedule_royalsnationals(royalsnationals,2),make_schedule_royalsbraves(royalsbraves,3),
+                        make_schedule_royalsmets(royalsmets,2),make_schedule_royalsmarlins(royalsmarlins,2),
+                        make_schedule_twinsphillies(twinsphillies,2),make_schedule_twinsmets(twinsmets,3),
+                        make_schedule_twinsnationals(twinsnationals,3),make_schedule_twinsmarlins(twinsmarlins,2),
+                        make_schedule_twinsbraves(twinsbraves,2),make_schedule_twinsbrewers(twinsbrewers,3),
+                        make_schedule_astroscubs(astroscubs,3),make_schedule_astrosbrewers(astrosbrewers,3),
+                        make_schedule_astrosreds(astrosreds,2),make_schedule_astrospirates(astrospirates,2),
+                        make_schedule_astrosrockies(astrosrockies,3),make_schedule_astroscardinals(astroscardinals,2),
+                        make_schedule_angelsbrewers(angelsbrewers,3),make_schedule_angelscubs(angelscubs,2),
+                        make_schedule_angelsdodgers(angelsdodgers,3),make_schedule_angelscardinals(angelscardinals,2),
+                        make_schedule_angelsreds(angelsreds,3),make_schedule_angelspirates(angelspirates,2),
+                        make_schedule_athleticspirates(athleticspirates,3),make_schedule_athleticsreds(athleticsreds,2),
+                        make_schedule_athleticscardinals(athleticscardinals,3),make_schedule_athleticscubs(athleticscubs,2),
+                        make_schedule_athleticsgiants(athleticsgiants,3),make_schedule_athleticsbrewers(athleticsbrewers,2),
+                        make_schedule_marinerscubs(marinerscubs,3),make_schedule_marinerscardinals(marinerscardinals,3),
+                        make_schedule_marinersbrewers(marinersbrewers,2),make_schedule_marinerspadres(marinerspadres,3),
+                        make_schedule_marinerspirates(marinerspirates,2),make_schedule_rangerscubs(rangerscubs,2),
+                        make_schedule_rangersdiamondbacks(rangersdiamondbacks,3),make_schedule_rangerspirates(rangerspirates,3),
+                        make_schedule_rangerscardinals(rangerscardinals,2),make_schedule_rangersreds(rangersreds,3),
+                        make_schedule_rangersbrewers(rangersbrewers,3))        
+  
+###simulate the season  
+  
+  talents<- c(bluejays$pyth, orioles$pyth,rays$pyth,redsox$pyth, yankees$pyth, indians$pyth, royals$pyth, tigers$pyth, twins$pyth, whitesox$pyth, angels$pyth, astros$pyth, athletics$pyth, mariners$pyth, rangers$pyth, braves$pyth, marlins$pyth, mets$pyth, nationals$pyth, phillies$pyth, brewers$pyth, cardinals$pyth, cubs$pyth, pirates$pyth, reds$pyth, diamondbacks$pyth, dodgers$pyth, giants$pyth, padres$pyth, rockies$pyth)
+  TAL <- tibble (Team = teams, Talent = talents)	
+  SCH <- schedule %>%
+    inner_join(TAL, by = c("Home" = "Team")) %>%
+    rename (Talent.Home = Talent) %>%
+    inner_join(TAL, by = c("Visitor" = "Team")) %>%
+    rename(Talent.Visitor = Talent)
+  SCH %>%
+    mutate(prob.Home = exp(Talent.Home) / (exp(Talent.Home) + exp(Talent.Visitor))) -> SCH
+  
+  SCH %>%
+    mutate(outcome = rbinom(nrow(.), 1, prob.Home),
+           winner = ifelse(outcome, Home, Visitor)) -> SCH
+  SCH%>%
+    select(Visitor, Home, prob.Home, outcome, winner)
+  SCH%>%
+    group_by(winner) %>%
+    summarise(Wins = n()) %>%
+    inner_join(TAL, by = c("winner" = "Team")) -> RESULTS
+  
+  for(j in 1:nrow(RESULTS)){
+    row<-RESULTS[j,]
+    name = row$winner
+    wins = row$Wins
+    final.results[i,name]=wins
+    
+  }
+  
+}
+
+###view results
+
+View(final.results)
+summary(final.results)

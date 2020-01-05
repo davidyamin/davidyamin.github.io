@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./style/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
+    <title>David Yamin</title>
+</head>
+<body>
+    <header>
+        <div class="header__main"><img src="./images/icons/data-icon.png" alt=""></div>
+        <nav class="header__nav">
+            <a class="nav__item" href="#home">HOME</a>
+            <a class="nav__item" href="#portfolio">PORTFOLIO</a>
+            <a class="nav__item" href="#contact">CONTACT</a>
+        </nav>
+    </header>
+    <main id="home">
+        <div class="me">
+            <img src="./images/portfolio-pic.png" alt="">
+        </div>
+        <div class="about-me">
+            <h1>Hello!</h1>
+            <h2>My name is David Yamnin.</h2>
+            <h2>I am a data scientist.</h2>
+        </div>
+    </main>
+    <section class="skills">
+        <div class="skills__title">
+            <h2>Coding skills</h2>
+        </div>
+        <div class="skills__wrapper">
+            <div class="skills__item">
+                <h2>R</h2>
+                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ad, eum.</p>
+            </div>
+            <div class="skills__item">
+                <h2>Pyton</h2>
+                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ad, eum.</p>
+            </div>
+            <div class="skills__item">
+                <h2>SQL</h2>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio, vitae?</p>
+            </div>
+            <div class="skills__item">
+                <h2>Tableau</h2>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam, corporis.</p>
+            </div>
+            <div class="skills__item">
+                <h2>Advanced Exel</h2>
+                <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Cum, fugiat!</p>
+            </div>
+        </div>
+    </section>
+    <section class="portfolio" id="portfolio">
+        <div class="portfolio__title">
+            <h2>Portfolio</h2>
+        </div>
+        <div class="portfolio-items">
+            <div class="portfolio__item">
+                <h2>2019 Major League Baseball Monte Carlo Simulation</h2>
+                <button class="see-more">See more</button>
+            </div>
+            <div class="portfolio__item">
+                <h2>Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur.</h2>
+                <button class="see-more">See more</button>
+                <div class="popup"></div>
+            </div>
+            <div class="portfolio__item">
+                <h2>Lorem ipsum dolor sit amet consectetur adipisicing.</h2>
+                <button class="see-more">See more</button>
+                <div class="popup"></div>
+            </div>
+        </div>
+
+     <!-- If you want to add new portfolio item:
+                1. Copy <div> with class "portfolio__item" (at the top), 
+                    paste it after last portfolio item and change <h2> value
+                2. Copy <div> with class "inner__item" (at the bottom),
+                    paste it after last inner item and you can add everything you want
+
+                    <h2> tag is main heading
+                    <h3> tag is secondary heading
+                    <p> tag is text-description inside
+                    <img src=""> tag is image
+                    If you want to add new image - paste it inside the map "" at 
+                    Github page and also type link to this image => scr="(here is a link)"
+                 -->
+
+    </section>
+    <div class="portfolio__inner">
+            <div class="inner__item hide">
+                <button class="return">Return</button>
+                <a href="./portfolio/portfolio-txt/portfolio-item-1/MlbPredicitionModel2019txt.txt" 
+                target="_blank"><span>See on Github</span></a>
+                <h2>Simulating the 2019 MLB Season in R</h2>
+                <h3>David Yamin</h3>
+                <p>Combining pre-season projected performance metrics for 
+                    Major League hitters and pitchers with Bill James’ Pythagorean 
+                    Formula for teams’ projected winning percentage enables us the 
+                    simulate the upcoming 2019 baseball season in R as many times as we wish.
+                </p>
+                <h3>Accessing My R Code and Datasets</h3>
+                <p>My R code used to generate the model described below and related plots 
+                    and graphics is available for download 
+                    <a href="./portfolio/portfolio-txt/portfolio-item-1/MlbPredictionModel2019.txt" 
+                    download>here.</a>
+                    The 2019 datasets containing Fangraphs’ hitter and pitcher pre-season 
+                    projected performances are available for download 
+                    <a href="./portfolio/portfolio-txt/portfolio-item-1/FG_2019_Hitters.xlsx" download>here for hitters</a> 
+                    and 
+                    <a href="./portfolio/portfolio-txt/portfolio-item-1/FG_2019_Pitchers.xlsx" download>here for pitchers</a>.
+                </p>
+                <h3>Bill James’ Pythagorean Formula</h3>
+                <p>I utilized the following iteration of Bill James’ Pythagorean Formula 
+                    for estimating a team’s expected winning percentage:
+                </p>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/formula.png" alt="">                    
+                <h3>Summary of Results</h3>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/table.png" alt="">
+                <h3>Yankees’ Projected Win Distribution</h3>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/graph.png" alt="">
+            </div>
+
+            <div class="inner__item hide">
+                <button class="return">Return</button>
+                <a href="./portfolio/portfolio-txt/MlbPredicitionModel2019_txt.txt" target="_blank"><span>See on Github</span></a>
+                <h2>Lorem ipsum dolor sit amet.</h2>
+                <h3>David Yamin</h3>
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+                    Hic, temporibus magnam. Veritatis, officiis rerum, dolore 
+                    qui eos voluptatibus id saepe similique facilis laudantium 
+                    quaerat totam vitae. Corporis vitae aspernatur natus recusandae 
+                    voluptates laudantium obcaecati ipsa perspiciatis facilis nemo. 
+                    Voluptatum quo debitis reprehenderit aut corrupti assumenda.
+                </p>
+                <h3>Accessing My R Code and Datasets</h3>
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+                    Hic, temporibus magnam. Veritatis, officiis rerum, dolore 
+                    qui eos voluptatibus id saepe similique facilis laudantium 
+                    quaerat totam vitae. Corporis vitae aspernatur natus recusandae 
+                    voluptates laudantium obcaecati ipsa perspiciatis facilis nemo. 
+                    Voluptatum quo debitis reprehenderit aut corrupti assumenda.
+                </p>
+                <h3>Bill James’ Pythagorean Formula</h3>
+                <p>I utilized the following iteration of Bill James’ Pythagorean Formula 
+                    for estimating a team’s expected winning percentage:
+                </p>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/formula.png" alt="">                    
+                <h3>Summary of Results</h3>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/table.png" alt="">
+                <h3>Yankees’ Projected Win Distribution</h3>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/graph.png" alt="">
+            </div>
+
+            <div class="inner__item hide">
+                <button class="return">Return</button>
+                <a href="./portfolio/portfolio-txt/MlbPredicitionModel2019_txt.txt" target="_blank"><span>See on Github</span></a>
+                <h2>Simulating the 2019 MLB Season in R</h2>
+                <h3>David Yamin</h3>
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+                    Hic, temporibus magnam. Veritatis, officiis rerum, dolore 
+                    qui eos voluptatibus id saepe similique facilis laudantium 
+                    quaerat totam vitae. Corporis vitae aspernatur natus recusandae 
+                    voluptates laudantium obcaecati ipsa perspiciatis facilis nemo. 
+                    Voluptatum quo debitis reprehenderit aut corrupti assumenda.
+                </p>
+                <h3>Accessing My R Code and Datasets</h3>
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+                    Hic, temporibus magnam. Veritatis, officiis rerum, dolore 
+                    qui eos voluptatibus id saepe similique facilis laudantium 
+                    quaerat totam vitae. Corporis vitae aspernatur natus recusandae 
+                    voluptates laudantium obcaecati ipsa perspiciatis facilis nemo. 
+                    Voluptatum quo debitis reprehenderit aut corrupti assumenda.
+                </p>
+                <h3>Bill James’ Pythagorean Formula</h3>
+                <p>I utilized the following iteration of Bill James’ Pythagorean Formula 
+                    for estimating a team’s expected winning percentage:
+                </p>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/formula.png" alt="">                    
+                <h3>Summary of Results</h3>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/table.png" alt="">
+                <h3>Yankees’ Projected Win Distribution</h3>
+                <img src="./portfolio/portfolio-images/portfolio-item-1/graph.png" alt="">
+            </div>
+        </div>
+    <footer>
+        <div class="footer__title">
+            <h2>Contact</h2>
+        </div>
+        <div class="footer__contact" id="contact">
+            <div class="footer__item">
+                <a href="mailto:dyamin.data.science@gmail.com" target="_blank">
+                    <img src="./images/icons/gmail-foo.png" alt="">
+                    dyamin.data.science@gmail.com</a>
+            </div>
+            <div class="footer__item">
+                <a href="https://linkedin.com/in/davidyamin" target="_blank">
+                    <img src="./images/icons/linkedin-foo.png" alt="">
+                    www.linkedin.com/in/davidyamin</a>
+            </div>
+        </div>
+    </footer>
+    <script src="./script/index.js"></script>
+</body>
+</html>
